@@ -56,7 +56,7 @@ async function generarMensajeConIA() {
   }
 
   const fecha = obtenerFechaFormateada();
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
   // Este prompt le pide a Gemini buscar partidos reales del día actual y armar el mensaje con esos datos reales.
   const prompt = `
