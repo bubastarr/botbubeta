@@ -60,18 +60,21 @@ async function generarMensajeConIA() {
 
   // Este prompt le pide a Gemini buscar partidos reales del día actual y armar el mensaje con esos datos reales.
   const prompt = `
-    Busca en Google cuáles son los partidos de fútbol, baloncesto u otros deportes más importantes y destacados para hoy, ${fecha}.
-    Luego, basándote en esos partidos reales que encontraste, redacta un mensaje enérgico y motivador para el canal de apuestas de Telegram 'La Bubaneta'.
+    Busca en Google cuáles son las últimas noticias y novedades del Mundial de Fútbol de 2026, así como los partidos de fútbol, baloncesto u otros deportes destacados para hoy, ${fecha}.
+    Luego, basándote en lo que encontraste, redacta un mensaje enérgico, informativo y motivador para el canal de apuestas de Telegram 'La Bubaneta'.
 
     Escribe el mensaje directamente con la siguiente estructura y formato HTML compatible con Telegram (usa únicamente <b>, <i>, <code> y listas):
 
-    🔥 <b>BUBANETA ACTIVA</b> 🔥
+    🔥 <b>BUBANETA ACTIVA: MUNDIAL & PICKS</b> 🔥
     📅 <i>${fecha}</i>
     ━━━━━━━━━━━━━━━━━━━━
     👋 ¡Buen día, muchachos!
 
-    📢 <b>Mensaje y análisis de hoy:</b>
-    [Escribe aquí tu análisis motivador del día en español. Menciona por su nombre 2 o 3 de los partidos reales que encontraste para hoy y aconseja al grupo que los estudie. Mantén un tono de tipster motivado. Usa jergas como "parlays", "sumar verdes" y "estudiar los picks". Sé creativo y cambia la redacción cada día]
+    📰 <b>Novedades del Mundial 2026:</b>
+    [Menciona brevemente 1 o 2 noticias reales e interesantes de hoy sobre el Mundial de 2026 basadas en lo que encontraste en Google Search. Sé dinámico]
+
+    📢 <b>Picks y análisis de hoy:</b>
+    [Escribe aquí tu análisis motivador del día en español. Menciona por su nombre 2 o 3 de los partidos reales que encontraste para hoy (pueden ser del Mundial u otros deportes) y aconseja al grupo que los estudie. Mantén un tono de tipster motivado. Usa jergas como "parlays", "sumar verdes" y "estudiar los picks". Sé creativo y cambia la redacción cada día]
 
     📊 <b>Reglas de oro:</b>
     • Estudiar bien antes de meterle 🧠
@@ -81,8 +84,8 @@ async function generarMensajeConIA() {
     🤖 <i>Mensaje automático generado con IA de la Bubaneta</i>
 
     Instrucciones críticas:
-    1. NO inventes partidos. Usa los partidos que existan en la realidad para hoy. Si no hay partidos destacados, menciona ligas activas hoy.
-    2. No incluyas introducciones como "Aquí tienes el mensaje de hoy" ni bloques de código de markdown (\`\`\`). Empieza el texto directamente con "🔥 <b>BUBANETA ACTIVA</b> 🔥".
+    1. NO inventes partidos ni noticias. Usa eventos y noticias reales de hoy.
+    2. No incluyas introducciones de IA ni bloques de código de markdown (\`\`\`). Empieza el texto directamente con "🔥 <b>BUBANETA ACTIVA: MUNDIAL & PICKS</b> 🔥".
   `.trim();
 
   try {
