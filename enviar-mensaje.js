@@ -42,6 +42,14 @@ ${fraseAleatoria}
 }
 
 async function generarMensajeConIA() {
+  console.log("--- INICIO DEPURACIÓN ---");
+  console.log("¿TELEGRAM_TOKEN está definido?", !!TELEGRAM_TOKEN);
+  console.log("¿GEMINI_API_KEY está definido?", !!GEMINI_API_KEY);
+  if (GEMINI_API_KEY) {
+    console.log("Longitud de GEMINI_API_KEY:", GEMINI_API_KEY.length);
+  }
+  console.log("--- FIN DEPURACIÓN ---");
+
   if (!GEMINI_API_KEY) {
     console.warn('GEMINI_API_KEY no configurado en las variables de entorno. Usando mensaje de respaldo.');
     return obtenerMensajeRespaldo();
