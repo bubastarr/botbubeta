@@ -96,7 +96,8 @@ async function generarMensajeConIA() {
     });
 
     if (!response.ok) {
-      throw new Error(`Error en API de Gemini: ${response.statusText} (${response.status})`);
+      const errorText = await response.text();
+      throw new Error(`Error en API de Gemini: ${response.statusText} (${response.status}) - Detalles: ${errorText}`);
     }
 
     const data = await response.json();
