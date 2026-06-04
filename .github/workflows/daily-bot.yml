@@ -2,9 +2,8 @@ name: Telegram Daily Message
 
 on:
   schedule:
-    # Se ejecuta todos los días a las 09:00 AM UTC (que son las 05:00 AM hora local UTC-4 en tu huso horario actual)
-    # Puedes cambiar '0 9 * * *' para ajustar la hora si lo deseas (minuto hora día_mes mes día_semana)
-    - cron: '0 14,23 * * *'
+    - cron: '5 10,19 * * *'
+      timezone: 'America/Santiago'
   workflow_dispatch: # Permite ejecutar el flujo manualmente desde la interfaz de GitHub
 
 jobs:
