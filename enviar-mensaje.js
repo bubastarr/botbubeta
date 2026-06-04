@@ -1,18 +1,16 @@
 const TOKEN = process.env.TELEGRAM_TOKEN;
 const CHAT_ID = '-1003632844994';
 
-// Lista de frases dinámicas para "darle vida" al mensaje
+// Lista de frases de la Bubaneta enfocadas en apuestas, parlays y mentalidad ganadora
 const FRASES = [
-  "La única manera de hacer un gran trabajo es amar lo que haces. 💻",
-  "El éxito no es el final, el fracaso no es la ruina: lo que cuenta es el valor para continuar. 🚀",
-  "La persistencia supera al talento cuando el talento no se esfuerza. 💪",
-  "No cuentes los días, haz que los días cuenten. 🌟",
-  "El mejor momento para plantar un árbol fue hace 20 años. El segundo mejor momento es ahora. 🌱",
-  "La disciplina tarde o temprano vencerá a la inteligencia. 🥋",
-  "Pequeños pasos todos los días te llevan a grandes metas. 🚶‍♂️",
-  "¡Haz de hoy un día increíble! La actitud lo es todo. 😎",
-  "Sé la mejor versión de ti mismo hoy. 💎",
-  "La creatividad es la inteligencia divirtiéndose. 🎨"
+  "¡Hoy le vamos con todo a las apuestas! Se viene jornada de mucho estudio y análisis. A ganar hoy. ⚽🔥",
+  "Hoy tenemos muy buenos parlays analizados. Confianza a tope y mentalidad ganadora. 📊💸",
+  "Dios es grande y seguimos sumando verdes, señores. El esfuerzo y el estudio siempre dan frutos. 🟢🏆",
+  "La confianza y estudiar las parlays es importante. Recuerden apostar con cabeza y responsabilidad. 🧠⚽",
+  "¡Buen día, familia! La Bubaneta está activa. Hoy vamos por más verdes para la comunidad. 🟢🤑",
+  "Hoy se trabaja duro en los análisis. La disciplina vence a la suerte. ¡Mentalidad ganadora hoy! 🚀💪",
+  "¡Activos muchachos! Tenemos la mira puesta en las mejores ligas hoy. Vamos a sumar verdes. 💵📈",
+  "Estudiar bien cada pick marca la diferencia. Menos suerte, más análisis. ¡Hoy cobramos! 🏆💎"
 ];
 
 function obtenerFechaFormateada() {
@@ -32,21 +30,22 @@ async function enviar() {
   const fecha = obtenerFechaFormateada();
   const fraseAleatoria = FRASES[Math.floor(Math.random() * FRASES.length)];
 
-  // Formato HTML premium para Telegram
+  // Formato HTML premium para Telegram estilo canal de apuestas
   const mensajeHTML = `
-📅 <b>${fecha}</b>
+🔥 <b>BUBANETA ACTIVA</b> 🔥
+📅 <i>${fecha}</i>
 ━━━━━━━━━━━━━━━━━━━━
-👋 ¡Hola, grupo! Espero que tengan un excelente día.
+👋 ¡Buen día, muchachos!
 
-💡 <b>Inspiración para hoy:</b>
-<i>"${fraseAleatoria}"</i>
+📢 <b>Mensaje de hoy:</b>
+${fraseAleatoria}
 
-🔋 <b>Recordatorios saludables:</b>
-• Beber agua suficiente 💧
-• Estirar las piernas 🚶‍♂️
-• Descansar la vista de la pantalla 👁️
+📊 <b>Reglas de oro:</b>
+• Estudiar bien antes de meterle 🧠
+• Controlar el bankroll y stake 📉
+• ¡A seguir sumando verdes! 🟢💸
 ━━━━━━━━━━━━━━━━━━━━
-🤖 <i>Mensaje automático enviado por Bubeta_bot</i>
+🤖 <i>Mensaje automático de Bubeta_bot</i>
   `.trim();
 
   const url = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
