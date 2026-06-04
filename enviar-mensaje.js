@@ -41,6 +41,13 @@ ${fraseAleatoria}
   `.trim();
 }
 
+function obtenerMomentoDia() {
+  const opciones = { hour: 'numeric', hour12: false, timeZone: 'America/Santiago' };
+  const hora = parseInt(new Date().toLocaleTimeString('es-ES', opciones));
+  console.log(`Hora actual en Chile para depuración: ${hora}:00`);
+  return (hora < 15) ? 'MAÑANA' : 'TARDE_NOCHE';
+}
+
 async function generarMensajeConIA() {
   console.log("--- INICIO DEPURACIÓN ---");
   console.log("¿TELEGRAM_TOKEN está definido?", !!TELEGRAM_TOKEN);
@@ -56,25 +63,36 @@ async function generarMensajeConIA() {
   }
 
   const fecha = obtenerFechaFormateada();
+  const momento = obtenerMomentoDia();
+  const esManana = momento === 'MAÑANA';
+
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-  // Este prompt le pide a Gemini buscar partidos reales del día actual y armar el mensaje con esos datos reales.
+  // Prompt dinámico adaptado a la edición de la mañana o tarde/noche
   const prompt = `
-    Busca en Google cuáles son las últimas noticias y novedades del Mundial de Fútbol de 2026, así como los partidos de fútbol, baloncesto u otros deportes destacados para hoy, ${fecha}.
+    Busca en Google cuáles son las últimas noticias y novedades del Mundial de Fútbol de 2026, así como los partidos de fútbol, baloncesto u otros deportes destacados de hoy, ${fecha}.
     Luego, basándote en lo que encontraste, redacta un mensaje enérgico, informativo y motivador para el canal de apuestas de Telegram 'La Bubaneta'.
+
+    Estás redactando la ${esManana ? 'EDICIÓN DE LA MAÑANA (10:00 AM hora chilena)' : 'EDICIÓN DE LA TARDE-NOCHE (7:00 PM hora chilena)'}.
+    Adapta el contenido de la siguiente manera:
+    - Si es de mañana: Enfócate en la previa de los partidos del día y las noticias del Mundial de esta mañana.
+    - Si es de tarde/noche: Destaca noticias del cierre del día del Mundial, algunos resultados clave que ya se hayan dado y un vistazo a los partidos destacados de mañana.
 
     Escribe el mensaje directamente con la siguiente estructura y formato HTML compatible con Telegram (usa únicamente <b>, <i>, <code> y listas):
 
-    🔥 <b>BUBANETA ACTIVA: MUNDIAL & PICKS</b> 🔥
+    🔥 <b>BUBANETA ACTIVA: MUNDIAL & PICKS (${esManana ? 'Edición Mañana ☀️' : 'Edición Tarde-Noche 🌙'})</b> 🔥
     📅 <i>${fecha}</i>
     ━━━━━━━━━━━━━━━━━━━━
-    👋 ¡Buen día, muchachos!
+    👋 ¡${esManana ? 'Buen día' : 'Buenas tardes/noches'}, muchachos!
 
     📰 <b>Novedades del Mundial 2026:</b>
-    [Menciona brevemente 1 o 2 noticias reales e interesantes de hoy sobre el Mundial de 2026 basadas en lo que encontraste en Google Search. Sé dinámico]
+    [Menciona brevemente 1 o 2 noticias reales e interesantes de hoy sobre el Mundial de 2026 basadas en lo que encontraste en Google Search]
 
-    📢 <b>Picks y análisis de hoy:</b>
-    [Escribe aquí tu análisis motivador del día en español. Menciona por su nombre 2 o 3 de los partidos reales que encontraste para hoy (pueden ser del Mundial u otros deportes) y aconseja al grupo que los estudie. Mantén un tono de tipster motivado. Usa jergas como "parlays", "sumar verdes" y "estudiar los picks". Sé creativo y cambia la redacción cada día]
+    📢 <b>${esManana ? 'Picks y análisis de hoy' : 'Análisis y partidos para mañana'}:</b>
+    [Escribe aquí tu análisis motivador del día en español.
+     - Si es mañana: Menciona por su nombre 2 o 3 de los partidos que se jueguen hoy para que el grupo los estudie.
+     - Si es tarde/noche: Menciona de forma enérgica 2 o 3 partidos atractivos que se jueguen mañana para ir analizando la jugada previa.
+     Usa jerga de apuestas como "parlays", "sumar verdes" y "estudiar los picks". Sé creativo]
 
     📊 <b>Reglas de oro:</b>
     • Estudiar bien antes de meterle 🧠
@@ -85,7 +103,7 @@ async function generarMensajeConIA() {
 
     Instrucciones críticas:
     1. NO inventes partidos ni noticias. Usa eventos y noticias reales de hoy.
-    2. No incluyas introducciones de IA ni bloques de código de markdown (\`\`\`). Empieza el texto directamente con "🔥 <b>BUBANETA ACTIVA: MUNDIAL & PICKS</b> 🔥".
+    2. No incluyas introducciones de IA ni bloques de código de markdown (\`\`\`). Empieza el texto directamente con "🔥 <b>BUBANETA ACTIVA: MUNDIAL & PICKS".
   `.trim();
 
   try {
