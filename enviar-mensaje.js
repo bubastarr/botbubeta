@@ -156,9 +156,13 @@ async function enviar() {
       })
     });
     const data = await res.json();
-    console.log(data.ok ? 'Mensaje enviado con éxito!' : 'Error de Telegram: ' + data.description);
+    if (!data.ok) {
+      throw new Error('Error al enviar a Telegram: ' + data.description);
+    }
+    console.log('Mensaje enviado con éxito!');
   } catch (err) {
-    console.error('Error de red al enviar a Telegram:', err);
+    console.error('Error de red o de API al enviar a Telegram:', err);
+    process.exit(1); // Fuerza a que la GitHub Action falle visiblemente
   }
 }
 
