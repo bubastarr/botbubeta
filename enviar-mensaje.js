@@ -78,7 +78,7 @@ async function generarMensajeConIA() {
     - Si es de mañana: Enfócate en la previa de los partidos del día y las noticias del Mundial de esta mañana.
     - Si es de tarde/noche: Destaca noticias del cierre del día del Mundial, algunos resultados clave que ya se hayan dado y un vistazo a los partidos destacados de mañana.
 
-    Escribe el mensaje directamente con la siguiente estructura y formato HTML compatible con Telegram (usa únicamente <b>, <i>, <code> y listas):
+    Escribe el mensaje directamente con la siguiente estructura y formato HTML compatible con Telegram (usa únicamente <b>, <i>, <code>):
 
     🔥 <b>BUBANETA ACTIVA: MUNDIAL & PICKS (${esManana ? 'Edición Mañana ☀️' : 'Edición Tarde-Noche 🌙'})</b> 🔥
     📅 <i>${fecha}</i>
@@ -101,9 +101,12 @@ async function generarMensajeConIA() {
     ━━━━━━━━━━━━━━━━━━━━
     🤖 <i>Mensaje automático generado con IA de la Bubaneta</i>
 
-    Instrucciones críticas:
+    Instrucciones críticas de formato:
     1. NO inventes partidos ni noticias. Usa eventos y noticias reales de hoy.
-    2. No incluyas introducciones de IA ni bloques de código de markdown (\`\`\`). Empieza el texto directamente con "🔥 <b>BUBANETA ACTIVA: MUNDIAL & PICKS".
+    2. NO utilices etiquetas HTML como <ul>, <li>, <p>, <div>, ni <br>.
+    3. Si quieres hacer viñetas, usa texto plano con puntos tradicionales (•) o guiones (-).
+    4. Si necesitas saltos de línea, usa saltos de línea normales de teclado, NUNCA la etiqueta <br>.
+    5. No incluyas introducciones de IA ni bloques de código de markdown (\`\`\`). Empieza el texto directamente con "🔥 <b>BUBANETA ACTIVA: MUNDIAL & PICKS".
   `.trim();
 
   try {
@@ -125,8 +128,18 @@ async function generarMensajeConIA() {
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
       let texto = data.candidates[0].content.parts[0].text;
       
-      // Limpiar posibles bloques de código markdown que Gemini a veces añade por error
-      texto = texto.replace(/```html/g, '').replace(/```/g, '').trim();
+      // Filtro de seguridad: limpiar cualquier HTML no soportado por Telegram que Gemini pueda haber generado
+      texto = texto
+        .replace(/<br\s*\/?>/gi, '\n') // Reemplazar saltos de línea HTML por reales
+        .replace(/<p>/gi, '') // Eliminar tags de párrafo
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<ul>/gi, '') // Eliminar listas HTML y reemplazarlas por texto plano
+        .replace(/<\/ul>/gi, '')
+        .replace(/<li>/gi, '• ')
+        .replace(/<\/li>/gi, '\n')
+        .replace(/```html/g, '')
+        .replace(/```/g, '')
+        .trim();
       return texto;
     }
     throw new Error('Respuesta de Gemini estructurada incorrectamente');
