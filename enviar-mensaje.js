@@ -149,17 +149,113 @@ async function generarMensajeConIA() {
   }
 }
 
+async function obtenerPartidosDeHoy() {
+  if (!GEMINI_API_KEY) return [];
+
+  const fecha = obtenerFechaFormateada();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+  const prompt = `
+    Busca en Google cuáles son los partidos de fútbol del Mundial de Fútbol de 2026 (o partidos muy importantes de otras ligas destacadas si no hay partidos del Mundial hoy) que se juegan hoy, ${fecha}.
+    
+    Devuelve la información de los partidos estrictamente en formato JSON array.
+    No añadas formato de markdown (NO uses bloques de código con \`\`\`json), no añadas textos de explicación, solo devuelve un JSON array que contenga objetos con esta estructura exacta:
+    [
+      {
+        "equipo1": "Nombre del Equipo 1 (ej. México)",
+        "bandera1": "Emoji de la bandera del Equipo 1 (ej. 🇲🇽)",
+        "equipo2": "Nombre del Equipo 2 (ej. Sudáfrica)",
+        "bandera2": "Emoji de la bandera del Equipo 2 (ej. 🇿🇦)",
+        "horario": "Hora del partido en Chile (ej. 18:00 hrs)"
+      }
+    ]
+    
+    Si no hay partidos destacados hoy, devuelve un array vacío: []
+  `.trim();
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ google_search: {} }]
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Error en API de Gemini al buscar partidos:", errText);
+      return [];
+    }
+
+    const data = await response.json();
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+      let texto = data.candidates[0].content.parts[0].text;
+      
+      // Limpiar markdown si Gemini lo añade por error
+      texto = texto.replace(/```json/gi, '').replace(/```/gi, '').trim();
+      
+      // Localizar el inicio y fin del array JSON
+      const inicio = texto.indexOf('[');
+      const fin = texto.lastIndexOf(']');
+      if (inicio !== -1 && fin !== -1) {
+        const jsonTexto = texto.substring(inicio, fin + 1);
+        return JSON.parse(jsonTexto);
+      }
+    }
+    return [];
+  } catch (err) {
+    console.error("Error al obtener partidos para encuestas:", err);
+    return [];
+  }
+}
+
+async function enviarEncuesta(equipo1, bandera1, equipo2, bandera2, horario) {
+  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPoll`;
+  
+  const pregunta = `${bandera1} ${equipo1} vs ${equipo2} ${bandera2} - ¿Quién gana? (${horario})`;
+  const opciones = [
+    `${equipo1} ${bandera1}`,
+    `Empate 🤝`,
+    `${equipo2} ${bandera2}`
+  ];
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        question: pregunta,
+        options: opciones,
+        is_anonymous: false // Permite registrar votos
+      })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      console.error('Error de Telegram al enviar la encuesta:', data.description);
+    } else {
+      console.log(`Encuesta enviada con éxito: ${equipo1} vs ${equipo2}`);
+    }
+  } catch (err) {
+    console.error('Error de red al enviar encuesta:', err);
+  }
+}
+
 async function enviar() {
   if (!TELEGRAM_TOKEN) {
     console.error('Error: TELEGRAM_TOKEN no está definido en las variables de entorno.');
     process.exit(1);
   }
 
+  const momento = obtenerMomentoDia();
   const mensaje = await generarMensajeConIA();
-  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-
+  
+  // 1. Enviar el boletín de noticias diario
+  const urlMsg = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
   try {
-    const res = await fetch(url, {
+    const res = await fetch(urlMsg, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -172,11 +268,24 @@ async function enviar() {
     if (!data.ok) {
       throw new Error('Error al enviar a Telegram: ' + data.description);
     }
-    console.log('Mensaje enviado con éxito!');
+    console.log('Mensaje diario enviado con éxito!');
   } catch (err) {
     console.error('Error de red o de API al enviar a Telegram:', err);
     process.exit(1); // Fuerza a que la GitHub Action falle visiblemente
   }
+
+  // 2. Si es edición de la mañana, buscar partidos y lanzar las encuestas de votación
+  if (momento === 'MAÑANA') {
+    console.log("Detectada Edición Mañana. Buscando partidos del día para encuestas...");
+    const partidos = await obtenerPartidosDeHoy();
+    console.log(`Partidos encontrados: ${partidos.length}`);
+    for (const p of partidos) {
+      if (p.equipo1 && p.equipo2) {
+        await enviarEncuesta(p.equipo1, p.bandera1 || '⚽', p.equipo2, p.bandera2 || '⚽', p.horario || 'Hoy');
+      }
+    }
+  }
 }
 
 enviar();
+
